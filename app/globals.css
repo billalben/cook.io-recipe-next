@@ -1,26 +1,142 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-primary: hsl(11, 87%, 59%);
+  --color-on-primary: hsl(0, 0%, 100%);
+  --color-primary-container: hsl(11, 87%, 92%);
+  --color-on-primary-container: hsl(11, 50%, 15%);
+
+  --color-surface: hsl(11, 20%, 95%);
+  --color-on-surface: hsl(0, 0%, 10%);
+  --color-on-surface-variant: hsl(0, 0%, 30%);
+
+  --color-outline: hsl(0, 0%, 80%);
+  --color-outline-variant: hsl(0, 0%, 85%);
+
+  --font-sans: var(--font-dm-sans);
+  --font-display: var(--font-dm-serif-display);
+
+  --header-height: 64px;
+  --mobile-nav-height: 80px;
+  --section-gap: 32px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+[data-theme="dark"] {
+  --color-primary: hsl(11, 87%, 66%);
+  --color-on-primary: hsl(0, 0%, 10%);
+  --color-primary-container: hsl(11, 50%, 15%);
+  --color-on-primary-container: hsl(11, 87%, 85%);
+
+  --color-surface: hsl(0, 0%, 7%);
+  --color-on-surface: hsl(0, 0%, 90%);
+  --color-on-surface-variant: hsl(0, 0%, 65%);
+
+  --color-outline: hsl(0, 0%, 25%);
+  --color-outline-variant: hsl(0, 0%, 18%);
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-color: hsl(0, 0%, 80%);
+  }
+  100% {
+    background-color: hsl(0, 0%, 90%);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+[data-theme="dark"] .skeleton {
+  animation-name: skeleton-loading-dark;
+}
+
+@keyframes skeleton-loading-dark {
+  0% {
+    background-color: hsl(0, 0%, 25%);
+  }
+  100% {
+    background-color: hsl(0, 0%, 35%);
+  }
+}
+
+.skeleton {
+  animation: skeleton-loading 1s linear infinite alternate;
+  border-radius: 0.25rem;
+}
+
+.skeleton-card-banner {
+  aspect-ratio: 1;
+  width: 100%;
+}
+
+.skeleton-card-title {
+  height: 1rem;
+  width: 80%;
+}
+
+.skeleton-card-text {
+  height: 0.75rem;
+  width: 40%;
+  margin-top: 0.5rem;
+}
+
+.skeleton-detail-banner {
+  width: 100%;
+  max-width: 600px;
+  aspect-ratio: 4/3;
+}
+
+.skeleton-detail-title {
+  height: 1.5rem;
+  width: 60%;
+  margin-top: 1rem;
+}
+
+.skeleton-detail-text {
+  height: 0.875rem;
+  width: 30%;
+  margin-top: 0.75rem;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.4s ease forwards;
+}
+
+@keyframes snackbar-in {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes snackbar-out {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+}
+
+.animate-snackbar-in {
+  animation: snackbar-in 0.3s ease forwards;
+}
+
+.animate-snackbar-out {
+  animation: snackbar-out 0.3s ease forwards;
 }
