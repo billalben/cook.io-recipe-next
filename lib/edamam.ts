@@ -1,5 +1,10 @@
 import { buildEdamamUrl } from "@/lib/api";
-import type { EdamamResponse } from "@/lib/types";
+import {
+  EdamamResponseSchema,
+  RecipeDetailSchema,
+  type EdamamResponse,
+  type Recipe,
+} from "@/lib/schemas";
 
 export const EDAMAM_REVALIDATE = 86400;
 export const EDAMAM_STALE_WHILE_REVALIDATE = 604800;
@@ -30,10 +35,7 @@ function isRateLimited(status: number, message: string): boolean {
   return status === 429 || /limit/i.test(message);
 }
 
-function errorMessageFromBody(
-  body: EdamamErrorBody | null,
-  status: number,
-): string {
+function errorMessageFromBody(body: EdamamErrorBody | null, status: number): string {
   return (
     body?.message ||
     body?.errors?.[0]?.error ||
@@ -53,10 +55,10 @@ export function friendlyErrorMessage(message: string): string {
   return message || "Something went wrong while loading recipes.";
 }
 
-export async function fetchEdamam<T = EdamamResponse>(
+async function fetchEdamamJson(
   queries?: URLSearchParams,
-  id?: string,
-): Promise<T> {
+  id?: string
+): Promise<unknown> {
   const url = buildEdamamUrl(queries, id);
   const res = await fetch(url, {
     next: { revalidate: EDAMAM_REVALIDATE, tags: ["edamam"] },
@@ -65,14 +67,31 @@ export async function fetchEdamam<T = EdamamResponse>(
   if (!res.ok) {
     const body = (await res.json().catch(() => null)) as EdamamErrorBody | null;
     const message = errorMessageFromBody(body, res.status);
-    throw new EdamamError(
-      message,
-      res.status,
-      isRateLimited(res.status, message),
-    );
+    throw new EdamamError(message, res.status, isRateLimited(res.status, message));
   }
 
   return res.json();
+}
+
+export async function fetchEdamamList(
+  queries: URLSearchParams
+): Promise<EdamamResponse> {
+  const raw = await fetchEdamamJson(queries);
+  const parsed = EdamamResponseSchema.safeParse(raw);
+
+  if (!parsed.success) {
+    throw new EdamamError("Unexpected response from the recipe service", 502);
+  }
+
+  return parsed.data;
+}
+
+export async function fetchEdamamDetail(id: string): Promise<Recipe | null> {
+  const raw = await fetchEdamamJson(undefined, id);
+  const parsed = RecipeDetailSchema.safeParse(raw);
+
+  if (!parsed.success) return null;
+  return parsed.data.recipe ?? null;
 }
 
 export function rewriteNextLink(nextHref: string | undefined): string | null {

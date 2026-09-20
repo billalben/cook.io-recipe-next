@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { DEFAULT_MEAL_TYPES, FILTER_KEYS } from "@/lib/filter-data";
+import { sanitizeRecipeSearchParams } from "@/lib/filter-validation";
 import { RecipesPageContent } from "./recipes-content";
 
 interface RecipesPageProps {
@@ -8,8 +9,24 @@ interface RecipesPageProps {
 }
 
 export default async function RecipesPage({ searchParams }: RecipesPageProps) {
-  const params = await searchParams;
-  const hasFilter = FILTER_KEYS.some((key) => params[key] !== undefined);
+  const raw = await searchParams;
+
+  const input = new URLSearchParams();
+  for (const [key, value] of Object.entries(raw)) {
+    if (value === undefined) continue;
+    if (Array.isArray(value)) {
+      for (const item of value) input.append(key, item);
+    } else {
+      input.append(key, value);
+    }
+  }
+
+  const { params: sanitized, changed } = sanitizeRecipeSearchParams(input);
+  const hasFilter = FILTER_KEYS.some((key) => sanitized.has(key));
+
+  if (changed && hasFilter) {
+    redirect(`/recipes?${sanitized.toString()}`);
+  }
 
   if (!hasFilter) {
     const defaults = new URLSearchParams();

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { EdamamError, fetchEdamam, friendlyErrorMessage } from "@/lib/edamam";
+import { EdamamError, fetchEdamamDetail, friendlyErrorMessage } from "@/lib/edamam";
+import { isValidRecipeId } from "@/lib/filter-validation";
 import { ErrorState } from "@/components/error-state";
 import { DetailContent } from "./detail-content";
 import type { Recipe } from "@/lib/types";
@@ -15,10 +16,12 @@ type RecipeResult =
   | { status: "error"; message: string };
 
 async function fetchRecipe(id: string): Promise<RecipeResult> {
+  if (!isValidRecipeId(id)) return { status: "notFound" };
+
   try {
-    const data = await fetchEdamam<{ recipe: Recipe }>(undefined, id);
-    if (!data.recipe) return { status: "notFound" };
-    return { status: "ok", recipe: data.recipe };
+    const recipe = await fetchEdamamDetail(id);
+    if (!recipe) return { status: "notFound" };
+    return { status: "ok", recipe };
   } catch (err) {
     if (err instanceof EdamamError && err.status === 404) {
       return { status: "notFound" };

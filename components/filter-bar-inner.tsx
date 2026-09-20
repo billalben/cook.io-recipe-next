@@ -5,6 +5,7 @@ import { useRouter, type ReadonlyURLSearchParams } from "next/navigation";
 import { Search, X, Filter } from "lucide-react";
 import { Accordion } from "@/components/accordion";
 import { FILTER_DATA } from "@/lib/filter-data";
+import { isRadioFilterKey, normalizeFilterValue } from "@/lib/filter-validation";
 
 interface FilterBarInnerProps {
   initialSearchParams: ReadonlyURLSearchParams;
@@ -17,9 +18,12 @@ function parseCheckedValues(
 ): Record<string, string[]> {
   const values: Record<string, string[]> = {};
   for (const [key, value] of params.entries()) {
-    if (key === "q" || key === "type" || key === "field") continue;
-    if (!values[key]) values[key] = [];
-    values[key].push(value);
+    const canonical = normalizeFilterValue(key, value);
+    if (!canonical) continue;
+    const current = values[key];
+    if (isRadioFilterKey(key) && current?.length) continue;
+    if (current?.includes(canonical)) continue;
+    values[key] = [...(current ?? []), canonical];
   }
   return values;
 }

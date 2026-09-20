@@ -2,14 +2,17 @@ import { NextRequest, NextResponse } from "next/server";
 import {
   EDAMAM_CACHE_HEADERS,
   EdamamError,
-  fetchEdamam,
+  fetchEdamamList,
   friendlyErrorMessage,
   rewriteNextLink,
 } from "@/lib/edamam";
+import { sanitizeApiSearchParams } from "@/lib/filter-validation";
 
 export async function GET(request: NextRequest) {
+  const params = sanitizeApiSearchParams(request.nextUrl.searchParams);
+
   try {
-    const data = await fetchEdamam(request.nextUrl.searchParams);
+    const data = await fetchEdamamList(params);
     const nextHref = rewriteNextLink(data._links?.next?.href);
 
     if (data._links) {

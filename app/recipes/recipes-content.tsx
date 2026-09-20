@@ -8,6 +8,7 @@ import { ErrorState } from "@/components/error-state";
 import { FilterBar } from "@/components/filter-bar";
 import { CARD_FIELDS, type EdamamResponse } from "@/lib/types";
 import { DEFAULT_MEAL_TYPES, FILTER_KEYS } from "@/lib/filter-data";
+import { sanitizeRecipeSearchParams } from "@/lib/filter-validation";
 
 async function readErrorMessage(res: Response): Promise<string> {
   const body = await res.json().catch(() => null);
@@ -23,14 +24,16 @@ export function RecipesPageContent() {
   const searchParams = useSearchParams();
 
   const paramsString = useMemo(() => {
-    const params = new URLSearchParams(searchParams.toString());
+    const params = sanitizeRecipeSearchParams(
+      new URLSearchParams(searchParams.toString())
+    ).params;
     params.set("type", "public");
     params.delete("field");
     for (const field of CARD_FIELDS) {
       params.append("field", field);
     }
 
-    if (!FILTER_KEYS.some((key) => searchParams.has(key))) {
+    if (!FILTER_KEYS.some((key) => params.has(key))) {
       for (const mealType of DEFAULT_MEAL_TYPES) {
         params.append("mealType", mealType);
       }

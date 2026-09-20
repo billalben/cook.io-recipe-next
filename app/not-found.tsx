@@ -8,11 +8,11 @@ export default function NotFound() {
         <UtensilsCrossed className="w-7 h-7" />
       </div>
       <h1 className="font-display text-2xl text-[var(--color-on-surface)]">
-        Recipe not found
+        Page not found
       </h1>
       <p className="text-sm text-[var(--color-on-surface-variant)] max-w-sm">
-        The recipe you&apos;re looking for doesn&apos;t exist or may have been
-        removed.
+        The page you&apos;re looking for doesn&apos;t exist or may have been
+        moved.
       </p>
       <Link
         href="/"

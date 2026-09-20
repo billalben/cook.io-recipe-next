@@ -2,24 +2,35 @@ import { NextRequest, NextResponse } from "next/server";
 import {
   EDAMAM_CACHE_HEADERS,
   EdamamError,
-  fetchEdamam,
+  fetchEdamamDetail,
   friendlyErrorMessage,
 } from "@/lib/edamam";
-import type { Recipe } from "@/lib/types";
+import { isValidRecipeId } from "@/lib/filter-validation";
 
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
 
-  try {
-    const data = await fetchEdamam<{ recipe: Recipe }>(
-      request.nextUrl.searchParams,
-      id
+  if (!isValidRecipeId(id)) {
+    return NextResponse.json(
+      { error: "Recipe not found", rateLimited: false },
+      { status: 404 }
     );
+  }
 
-    return NextResponse.json(data, { headers: EDAMAM_CACHE_HEADERS });
+  try {
+    const recipe = await fetchEdamamDetail(id);
+
+    if (!recipe) {
+      return NextResponse.json(
+        { error: "Recipe not found", rateLimited: false },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({ recipe }, { headers: EDAMAM_CACHE_HEADERS });
   } catch (err) {
     if (err instanceof EdamamError) {
       return NextResponse.json(

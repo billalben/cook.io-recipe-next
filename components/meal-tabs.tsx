@@ -6,6 +6,7 @@ import { RecipeCard } from "@/components/recipe-card";
 import { SkeletonCard } from "@/components/skeleton-card";
 import { ErrorState } from "@/components/error-state";
 import { CARD_FIELDS, type Hit, type EdamamResponse } from "@/lib/types";
+import { normalizeMealType } from "@/lib/filter-validation";
 
 const MEAL_TYPES = ["Breakfast", "Lunch", "Dinner", "Snack", "Teatime"] as const;
 const DEFAULT_MEAL_TYPE = "Breakfast";
@@ -16,7 +17,7 @@ export function MealTabs() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const param = searchParams.get(MEAL_PARAM)?.toLowerCase();
+  const param = normalizeMealType(searchParams.get(MEAL_PARAM));
   const activeTab =
     MEAL_TYPES.find((type) => type.toLowerCase() === param) ?? DEFAULT_MEAL_TYPE;
 
@@ -25,11 +26,12 @@ export function MealTabs() {
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    const isValid = MEAL_TYPES.some((type) => type.toLowerCase() === param);
-    if (isValid) return;
-    const params = new URLSearchParams(searchParams.toString());
-    params.set(MEAL_PARAM, DEFAULT_MEAL_TYPE.toLowerCase());
-    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    const canonical = new URLSearchParams();
+    canonical.set(MEAL_PARAM, param ?? DEFAULT_MEAL_TYPE.toLowerCase());
+
+    if (searchParams.toString() !== canonical.toString()) {
+      router.replace(`${pathname}?${canonical.toString()}`, { scroll: false });
+    }
   }, [param, pathname, router, searchParams]);
 
   useEffect(() => {
