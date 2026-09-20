@@ -35,10 +35,10 @@ export default function RootLayout({
       data-theme="light"
       suppressHydrationWarning
     >
-      <body className="min-h-screen flex flex-col bg-[var(--color-surface)] text-[var(--color-on-surface)] font-sans antialiased">
+      <body className="min-h-screen flex flex-col bg-(--color-surface) text-(--color-on-surface) font-sans antialiased">
         <ThemeProvider>
           <Header />
-          <main className="flex-1 pt-[var(--header-height)] pb-[var(--mobile-nav-height)] md:pb-0">
+          <main className="flex-1 pt-(--header-height) pb-(--mobile-nav-height) md:pb-0">
             {children}
           </main>
           <Snackbar />

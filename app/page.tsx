@@ -28,7 +28,7 @@ function MealTabsSkeleton() {
           {Array.from({ length: 5 }).map((_, i) => (
             <div
               key={i}
-              className="h-10 w-24 rounded-full bg-[var(--color-outline-variant)]"
+              className="h-10 w-24 rounded-full bg-(--color-outline-variant)"
             />
           ))}
         </div>

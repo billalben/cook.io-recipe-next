@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { buildEdamamUrl } from "@/lib/api";
+import { EdamamError, fetchEdamam, friendlyErrorMessage } from "@/lib/edamam";
+import { ErrorState } from "@/components/error-state";
 import { DetailContent } from "./detail-content";
 import type { Recipe } from "@/lib/types";
 
@@ -8,22 +9,43 @@ interface Props {
   params: Promise<{ id: string }>;
 }
 
-async function fetchRecipe(id: string): Promise<Recipe | null> {
+type RecipeResult =
+  | { status: "ok"; recipe: Recipe }
+  | { status: "notFound" }
+  | { status: "error"; message: string };
+
+async function fetchRecipe(id: string): Promise<RecipeResult> {
   try {
-    const url = buildEdamamUrl(undefined, id);
-    const res = await fetch(url, { next: { revalidate: 3600 } });
-    if (!res.ok) return null;
-    const data = await res.json();
-    return data.recipe ?? null;
-  } catch {
-    return null;
+    const data = await fetchEdamam<{ recipe: Recipe }>(undefined, id);
+    if (!data.recipe) return { status: "notFound" };
+    return { status: "ok", recipe: data.recipe };
+  } catch (err) {
+    if (err instanceof EdamamError && err.status === 404) {
+      return { status: "notFound" };
+    }
+
+    return {
+      status: "error",
+      message:
+        err instanceof EdamamError
+          ? friendlyErrorMessage(err.message)
+          : "Something went wrong while loading this recipe.",
+    };
   }
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
-  const recipe = await fetchRecipe(id);
-  if (!recipe) return { title: "Recipe Not Found — Cook.io" };
+  const result = await fetchRecipe(id);
+
+  if (result.status === "notFound") {
+    return { title: "Recipe Not Found — Cook.io" };
+  }
+  if (result.status === "error") {
+    return { title: "Recipe — Cook.io" };
+  }
+
+  const { recipe } = result;
   return {
     title: `${recipe.label} — Cook.io`,
     description: `${recipe.label} by ${recipe.source}. ${recipe.ingredientLines?.length ?? 0} ingredients.`,
@@ -37,8 +59,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function DetailPage({ params }: Props) {
   const { id } = await params;
-  const recipe = await fetchRecipe(id);
-  if (!recipe) notFound();
+  const result = await fetchRecipe(id);
 
-  return <DetailContent recipe={recipe} recipeId={id} />;
+  if (result.status === "notFound") notFound();
+
+  if (result.status === "error") {
+    return (
+      <div className="mx-auto max-w-2xl px-4">
+        <ErrorState message={result.message} />
+      </div>
+    );
+  }
+
+  return <DetailContent recipe={result.recipe} recipeId={id} />;
 }

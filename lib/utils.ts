@@ -9,7 +9,9 @@ export function getTime(minute: number): TimeResult {
 
   const time = days || hours || minute;
   const unitIndex = [days, hours, minute].lastIndexOf(time);
-  const timeUnit = ["days", "hours", "minutes"][unitIndex] as TimeResult["timeUnit"];
+  const timeUnit = ["days", "hours", "minutes"][
+    unitIndex
+  ] as TimeResult["timeUnit"];
 
   return { time, timeUnit };
 }
@@ -24,5 +26,10 @@ type ImageInfo = { url: string; width: number; height: number };
 
 export function getBestImage(images: EdamamImages | undefined): ImageInfo {
   if (!images) return { url: "", width: 0, height: 0 };
-  return (images.LARGE ?? images.REGULAR ?? images.SMALL ?? images.THUMBNAIL) ?? { url: "", width: 0, height: 0 };
+  return (
+    images.LARGE ??
+    images.REGULAR ??
+    images.SMALL ??
+    images.THUMBNAIL ?? { url: "", width: 0, height: 0 }
+  );
 }

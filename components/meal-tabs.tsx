@@ -4,6 +4,7 @@ import { useState, useCallback, useEffect } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { RecipeCard } from "@/components/recipe-card";
 import { SkeletonCard } from "@/components/skeleton-card";
+import { ErrorState } from "@/components/error-state";
 import { CARD_FIELDS, type Hit, type EdamamResponse } from "@/lib/types";
 
 const MEAL_TYPES = ["Breakfast", "Lunch", "Dinner", "Snack", "Teatime"] as const;
@@ -92,6 +93,21 @@ export function MealTabs() {
     [pathname, router, searchParams]
   );
 
+  const handleRetry = useCallback((mealType: string) => {
+    setErrors((prev) => {
+      if (!prev[mealType]) return prev;
+      const next = { ...prev };
+      delete next[mealType];
+      return next;
+    });
+    setLoadedTabs((prev) => {
+      if (!prev.has(mealType)) return prev;
+      const next = new Set(prev);
+      next.delete(mealType);
+      return next;
+    });
+  }, []);
+
   const handleKeyDown = (e: React.KeyboardEvent, currentIndex: number) => {
     let targetIndex = currentIndex;
     if (e.key === "ArrowRight") targetIndex = (currentIndex + 1) % MEAL_TYPES.length;
@@ -139,9 +155,10 @@ export function MealTabs() {
                 ))}
               </div>
             ) : errors[type] ? (
-              <p className="text-center py-12 text-red-500">
-                Couldn&apos;t load recipes: {errors[type]}
-              </p>
+              <ErrorState
+                message={errors[type]}
+                onRetry={() => handleRetry(type)}
+              />
             ) : (
               <>
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">

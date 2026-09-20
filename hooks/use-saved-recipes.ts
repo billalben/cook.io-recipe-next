@@ -6,7 +6,7 @@ import type { CardRecipe } from "@/lib/types";
 function loadFromStorage(): CardRecipe[] {
   if (typeof window === "undefined") return [];
   const keys = Object.keys(window.localStorage).filter((k) =>
-    k.startsWith("cookio-recipe")
+    k.startsWith("cookio-recipe"),
   );
   const recipes: CardRecipe[] = [];
   for (const key of keys) {
@@ -21,7 +21,8 @@ function loadFromStorage(): CardRecipe[] {
 }
 
 export function useSavedRecipes() {
-  const [savedRecipes, setSavedRecipes] = useState<CardRecipe[]>(loadFromStorage);
+  const [savedRecipes, setSavedRecipes] =
+    useState<CardRecipe[]>(loadFromStorage);
 
   const refresh = useCallback(() => {
     setSavedRecipes(loadFromStorage());

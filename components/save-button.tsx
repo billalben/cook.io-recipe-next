@@ -44,7 +44,10 @@ export function SaveButton({ recipeId }: SaveButtonProps) {
 
     try {
       const res = await fetch(`/api/recipes/${recipeId}?type=public`);
-      if (!res.ok) throw new Error("Failed to fetch");
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        throw new Error(body?.error || "Failed to save recipe");
+      }
       const data = await res.json();
       const recipe = data.recipe;
       if (recipe) {
@@ -58,8 +61,12 @@ export function SaveButton({ recipeId }: SaveButtonProps) {
         setIsSaved(true);
         window.dispatchEvent(new CustomEvent("snackbar", { detail: "Added to Recipe book" }));
       }
-    } catch {
-      window.dispatchEvent(new CustomEvent("snackbar", { detail: "Failed to save recipe" }));
+    } catch (err) {
+      window.dispatchEvent(
+        new CustomEvent("snackbar", {
+          detail: (err as Error).message || "Failed to save recipe",
+        })
+      );
     }
   }, [recipeId, isSaved]);
 

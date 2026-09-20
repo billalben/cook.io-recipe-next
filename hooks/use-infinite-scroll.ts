@@ -5,7 +5,7 @@ import { useEffect, useRef, useCallback } from "react";
 export function useInfiniteScroll(
   loadMore: () => void,
   hasMore: boolean,
-  loading: boolean
+  loading: boolean,
 ) {
   const observerRef = useRef<IntersectionObserver | null>(null);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
@@ -27,13 +27,13 @@ export function useInfiniteScroll(
             loadMore();
           }
         },
-        { threshold: 0.1 }
+        { threshold: 0.1 },
       );
 
       observerRef.current.observe(node);
       sentinelRef.current = node;
     },
-    [hasMore, loading, loadMore]
+    [hasMore, loading, loadMore],
   );
 
   useEffect(() => {

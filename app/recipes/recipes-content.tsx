@@ -4,9 +4,20 @@ import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import { RecipeCard } from "@/components/recipe-card";
 import { SkeletonCard } from "@/components/skeleton-card";
+import { ErrorState } from "@/components/error-state";
 import { FilterBar } from "@/components/filter-bar";
 import { CARD_FIELDS, type EdamamResponse } from "@/lib/types";
 import { DEFAULT_MEAL_TYPES, FILTER_KEYS } from "@/lib/filter-data";
+
+async function readErrorMessage(res: Response): Promise<string> {
+  const body = await res.json().catch(() => null);
+  return (
+    body?.message ||
+    body?.errors?.[0]?.error ||
+    body?.error ||
+    `Request failed (${res.status})`
+  );
+}
 
 export function RecipesPageContent() {
   const searchParams = useSearchParams();
@@ -43,31 +54,33 @@ function RecipesGrid({ paramsString }: { paramsString: string }) {
     hasLoaded: boolean;
     loadingMore: boolean;
     error: string | null;
+    loadMoreError: string | null;
   }>({
     recipes: [],
     nextUrl: null,
     hasLoaded: false,
     loadingMore: false,
     error: null,
+    loadMoreError: null,
   });
 
+  const [reloadKey, setReloadKey] = useState(0);
   const fetchingRef = useRef(false);
 
   useEffect(() => {
     let cancelled = false;
     fetchingRef.current = true;
 
+    setState((prev) => ({
+      ...prev,
+      hasLoaded: false,
+      error: null,
+      loadMoreError: null,
+    }));
+
     fetch(`/api/recipes?${paramsString}`)
       .then(async (res) => {
-        if (!res.ok) {
-          const body = await res.json().catch(() => null);
-          throw new Error(
-            body?.message ||
-              body?.errors?.[0]?.error ||
-              body?.error ||
-              `Request failed (${res.status})`
-          );
-        }
+        if (!res.ok) throw new Error(await readErrorMessage(res));
         return res.json();
       })
       .then((data: EdamamResponse) => {
@@ -78,6 +91,7 @@ function RecipesGrid({ paramsString }: { paramsString: string }) {
           hasLoaded: true,
           loadingMore: false,
           error: null,
+          loadMoreError: null,
         });
         fetchingRef.current = false;
       })
@@ -96,15 +110,20 @@ function RecipesGrid({ paramsString }: { paramsString: string }) {
       cancelled = true;
       fetchingRef.current = false;
     };
-  }, [paramsString]);
+  }, [paramsString, reloadKey]);
+
+  const handleRetry = useCallback(() => {
+    setReloadKey((key) => key + 1);
+  }, []);
 
   const handleLoadMore = useCallback(async () => {
     if (!state.nextUrl || state.loadingMore || fetchingRef.current) return;
 
-    setState((prev) => ({ ...prev, loadingMore: true }));
+    setState((prev) => ({ ...prev, loadingMore: true, loadMoreError: null }));
 
     try {
       const res = await fetch(state.nextUrl);
+      if (!res.ok) throw new Error(await readErrorMessage(res));
       const data: EdamamResponse = await res.json();
 
       setState((prev) => {
@@ -120,10 +139,15 @@ function RecipesGrid({ paramsString }: { paramsString: string }) {
           recipes: unique,
           nextUrl: data._links?.next?.href ?? null,
           loadingMore: false,
+          loadMoreError: null,
         };
       });
-    } catch {
-      setState((prev) => ({ ...prev, loadingMore: false }));
+    } catch (err) {
+      setState((prev) => ({
+        ...prev,
+        loadingMore: false,
+        loadMoreError: (err as Error).message,
+      }));
     }
   }, [state.nextUrl, state.loadingMore]);
 
@@ -135,7 +159,12 @@ function RecipesGrid({ paramsString }: { paramsString: string }) {
 
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && state.nextUrl && !state.loadingMore) {
+        if (
+          entries[0].isIntersecting &&
+          state.nextUrl &&
+          !state.loadingMore &&
+          !state.loadMoreError
+        ) {
           handleLoadMore();
         }
       },
@@ -144,7 +173,7 @@ function RecipesGrid({ paramsString }: { paramsString: string }) {
 
     observer.observe(node);
     return () => observer.disconnect();
-  }, [state.nextUrl, state.loadingMore, handleLoadMore]);
+  }, [state.nextUrl, state.loadingMore, state.loadMoreError, handleLoadMore]);
 
   return (
     <div className="flex-1 p-4 md:p-6">
@@ -152,52 +181,58 @@ function RecipesGrid({ paramsString }: { paramsString: string }) {
         All Recipes
       </h2>
 
-        {!state.hasLoaded ? (
+      {!state.hasLoaded ? (
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+          {Array.from({ length: 12 }).map((_, i) => (
+            <SkeletonCard key={i} />
+          ))}
+        </div>
+      ) : state.error ? (
+        <ErrorState message={state.error} onRetry={handleRetry} />
+      ) : state.recipes.length === 0 ? (
+        <p className="text-[var(--color-on-surface-variant)] text-center py-12">
+          No recipes found. Try different filters.
+        </p>
+      ) : (
+        <>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-            {Array.from({ length: 12 }).map((_, i) => (
-              <SkeletonCard key={i} />
+            {state.recipes.map((hit, i) => (
+              <RecipeCard
+                key={hit.recipe.uri}
+                title={hit.recipe.label}
+                image={hit.recipe.image}
+                cookingTime={hit.recipe.totalTime}
+                uri={hit.recipe.uri}
+                index={i}
+              />
             ))}
           </div>
-        ) : state.error ? (
-          <p className="text-center py-12 text-red-500">
-            Couldn&apos;t load recipes: {state.error}
-          </p>
-        ) : state.recipes.length === 0 ? (
-          <p className="text-[var(--color-on-surface-variant)] text-center py-12">
-            No recipes found. Try different filters.
-          </p>
-        ) : (
-          <>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-              {state.recipes.map((hit, i) => (
-                <RecipeCard
-                  key={hit.recipe.uri}
-                  title={hit.recipe.label}
-                  image={hit.recipe.image}
-                  cookingTime={hit.recipe.totalTime}
-                  uri={hit.recipe.uri}
-                  index={i}
-                />
+
+          {state.loadingMore && (
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <SkeletonCard key={i} />
               ))}
             </div>
+          )}
 
-            {state.loadingMore && (
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
-                {Array.from({ length: 6 }).map((_, i) => (
-                  <SkeletonCard key={i} />
-                ))}
-              </div>
-            )}
-
+          {state.loadMoreError ? (
+            <ErrorState
+              compact
+              message={state.loadMoreError}
+              onRetry={handleLoadMore}
+            />
+          ) : (
             <div ref={sentinelRef} className="h-10" />
+          )}
 
-            {!state.nextUrl && state.hasLoaded && (
-              <p className="text-center text-[var(--color-on-surface-variant)] py-8 text-sm">
-                No more recipes to load.
-              </p>
-            )}
-          </>
-        )}
+          {!state.nextUrl && !state.loadMoreError && state.hasLoaded && (
+            <p className="text-center text-[var(--color-on-surface-variant)] py-8 text-sm">
+              No more recipes to load.
+            </p>
+          )}
+        </>
+      )}
     </div>
   );
 }

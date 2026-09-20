@@ -15,7 +15,11 @@ interface DetailContentProps {
 export function DetailContent({ recipe, recipeId }: DetailContentProps) {
   const banner = getBestImage(recipe.images);
   const { time, timeUnit } = getTime(recipe.totalTime);
-  const tags = [...(recipe.cuisineType ?? []), ...(recipe.dietLabels ?? []), ...(recipe.dishType ?? [])];
+  const tags = [
+    ...(recipe.cuisineType ?? []),
+    ...(recipe.dietLabels ?? []),
+    ...(recipe.dishType ?? []),
+  ];
 
   function getTagType(tag: string): string {
     if (recipe.cuisineType?.includes(tag)) return "cuisineType";
@@ -26,7 +30,7 @@ export function DetailContent({ recipe, recipeId }: DetailContentProps) {
   return (
     <div className="mx-auto max-w-5xl">
       {banner.url && (
-        <figure className="w-full max-h-[400px] overflow-hidden relative aspect-[4/3]">
+        <figure className="w-full max-h-100 overflow-hidden relative aspect-4/3">
           <Image
             src={banner.url}
             alt={recipe.label}
@@ -40,13 +44,13 @@ export function DetailContent({ recipe, recipeId }: DetailContentProps) {
 
       <div className="p-4 md:p-8">
         <div className="flex items-start justify-between gap-4 mb-3">
-          <h1 className="font-display text-2xl md:text-3xl text-[var(--color-on-surface)]">
+          <h1 className="font-display text-2xl md:text-3xl text-(--color-on-surface)">
             {recipe.label ?? "Untitled"}
           </h1>
           <SaveButton recipeId={recipeId} />
         </div>
 
-        <p className="text-[var(--color-on-surface-variant)] mb-6">
+        <p className="text-(--color-on-surface-variant) mb-6">
           <span className="text-sm">by</span>{" "}
           <a
             href={recipe.url}
@@ -59,28 +63,28 @@ export function DetailContent({ recipe, recipeId }: DetailContentProps) {
         </p>
 
         <div className="grid grid-cols-3 gap-4 mb-8">
-          <div className="bg-[var(--color-outline-variant)] rounded-xl p-4 text-center">
-            <div className="text-2xl font-bold text-[var(--color-on-surface)]">
+          <div className="bg-(--color-outline-variant) rounded-xl p-4 text-center">
+            <div className="text-2xl font-bold text-(--color-on-surface)">
               {recipe.ingredients?.length ?? 0}
             </div>
-            <div className="text-xs text-[var(--color-on-surface-variant)] mt-1">
+            <div className="text-xs text-(--color-on-surface-variant) mt-1">
               Ingredients
             </div>
           </div>
-          <div className="bg-[var(--color-outline-variant)] rounded-xl p-4 text-center">
-            <div className="flex items-center justify-center gap-1 text-2xl font-bold text-[var(--color-on-surface)]">
+          <div className="bg-(--color-outline-variant) rounded-xl p-4 text-center">
+            <div className="flex items-center justify-center gap-1 text-2xl font-bold text-(--color-on-surface)">
               <Clock className="w-5 h-5" />
               <span>{time || "<1"}</span>
             </div>
-            <div className="text-xs text-[var(--color-on-surface-variant)] mt-1">
+            <div className="text-xs text-(--color-on-surface-variant) mt-1">
               {timeUnit}
             </div>
           </div>
-          <div className="bg-[var(--color-outline-variant)] rounded-xl p-4 text-center">
-            <div className="text-2xl font-bold text-[var(--color-on-surface)]">
+          <div className="bg-(--color-outline-variant) rounded-xl p-4 text-center">
+            <div className="text-2xl font-bold text-(--color-on-surface)">
               {Math.floor(recipe.calories)}
             </div>
-            <div className="text-xs text-[var(--color-on-surface-variant)] mt-1">
+            <div className="text-xs text-(--color-on-surface-variant) mt-1">
               Calories
             </div>
           </div>
@@ -100,9 +104,9 @@ export function DetailContent({ recipe, recipeId }: DetailContentProps) {
           </div>
         )}
 
-        <h2 className="font-display text-lg text-[var(--color-on-surface)] mb-4">
+        <h2 className="font-display text-lg text-(--color-on-surface) mb-4">
           Ingredients
-          <span className="ml-2 text-sm font-normal text-[var(--color-on-surface-variant)]">
+          <span className="ml-2 text-sm font-normal text-(--color-on-surface-variant)">
             for {recipe.yield} Servings
           </span>
         </h2>
@@ -112,7 +116,7 @@ export function DetailContent({ recipe, recipeId }: DetailContentProps) {
             {recipe.ingredientLines.map((line, i) => (
               <li
                 key={i}
-                className="flex items-start gap-2 text-[var(--color-on-surface)]"
+                className="flex items-start gap-2 text-(--color-on-surface)"
               >
                 <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
                 {line}
@@ -120,7 +124,7 @@ export function DetailContent({ recipe, recipeId }: DetailContentProps) {
             ))}
           </ul>
         ) : (
-          <p className="text-[var(--color-on-surface-variant)]">
+          <p className="text-(--color-on-surface-variant)">
             No ingredient details available.
           </p>
         )}

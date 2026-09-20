@@ -1,25 +1,32 @@
 import { NextRequest, NextResponse } from "next/server";
-import { buildEdamamUrl } from "@/lib/api";
+import {
+  EDAMAM_CACHE_HEADERS,
+  EdamamError,
+  fetchEdamam,
+  friendlyErrorMessage,
+  rewriteNextLink,
+} from "@/lib/edamam";
 
 export async function GET(request: NextRequest) {
-  const url = buildEdamamUrl(request.nextUrl.searchParams);
-
   try {
-    const response = await fetch(url);
+    const data = await fetchEdamam(request.nextUrl.searchParams);
+    const nextHref = rewriteNextLink(data._links?.next?.href);
 
-    if (!response.ok) {
-      const errorBody = await response.json().catch(() => null);
+    if (data._links) {
+      data._links.next = nextHref ? { href: nextHref } : undefined;
+    }
+
+    return NextResponse.json(data, { headers: EDAMAM_CACHE_HEADERS });
+  } catch (err) {
+    if (err instanceof EdamamError) {
       return NextResponse.json(
-        errorBody ?? { error: "Failed to fetch recipes" },
-        { status: response.status }
+        { error: friendlyErrorMessage(err.message), rateLimited: err.rateLimited },
+        { status: err.status }
       );
     }
 
-    const data = await response.json();
-    return NextResponse.json(data);
-  } catch {
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: "Internal server error", rateLimited: false },
       { status: 500 }
     );
   }

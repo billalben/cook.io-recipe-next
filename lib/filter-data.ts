@@ -180,10 +180,7 @@ export const FILTER_DATA: FilterSection[] = [
   },
 ];
 
-export const FILTER_KEYS = [
-  ...FILTER_DATA.map((section) => section.key),
-  "q",
-];
+export const FILTER_KEYS = [...FILTER_DATA.map((section) => section.key), "q"];
 
 export const HEALTH_TAGS = [
   "vegetarian",
@@ -228,7 +225,5 @@ export const HEALTH_TAGS = [
 ];
 
 export function getTagLabel(tag: string): string {
-  return tag
-    .replace(/-/g, " ")
-    .replace(/\b\w/g, (c) => c.toUpperCase());
+  return tag.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }

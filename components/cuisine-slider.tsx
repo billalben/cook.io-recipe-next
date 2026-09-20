@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { RecipeCard } from "@/components/recipe-card";
 import { SkeletonCard } from "@/components/skeleton-card";
+import { ErrorState } from "@/components/error-state";
 import { Carousel } from "@/components/carousel";
 import { ChevronRight } from "lucide-react";
 import { CARD_FIELDS, type EdamamResponse } from "@/lib/types";
@@ -16,12 +17,14 @@ export function CuisineSliders() {
   const [data, setData] = useState<Record<string, EdamamResponse | null>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
 
     async function load() {
       setLoading(true);
+      setError(null);
       const results: Record<string, EdamamResponse | null> = {};
       let firstError: string | null = null;
 
@@ -60,7 +63,9 @@ export function CuisineSliders() {
 
     load();
     return () => { cancelled = true; };
-  }, []);
+  }, [reloadKey]);
+
+  const handleRetry = () => setReloadKey((key) => key + 1);
 
   return (
     <section className="py-8 space-y-10">
@@ -82,9 +87,7 @@ export function CuisineSliders() {
                 ))}
               </div>
             ) : error && !data[cuisine.label] ? (
-              <p className="text-center py-12 text-red-500">
-                Couldn&apos;t load recipes: {error}
-              </p>
+              <ErrorState message={error} onRetry={handleRetry} />
             ) : (
               <Carousel ariaLabel={`Latest ${cuisine.label} recipes`}>
                 {(data[cuisine.label]?.hits ?? []).map((hit) => (
