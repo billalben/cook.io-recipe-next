@@ -24,7 +24,7 @@ export function RecipeCard({
 
   return (
     <div
-      className="card bg-[var(--color-surface)] rounded-xl overflow-hidden border border-[var(--color-outline)] transition-shadow hover:shadow-lg animate-fade-in"
+      className="card flex flex-col h-full bg-[var(--color-surface)] rounded-xl overflow-hidden border border-[var(--color-outline)] transition-shadow hover:shadow-lg animate-fade-in"
       style={{ animationDelay: `${100 * index}ms` }}
     >
       <Link
@@ -40,7 +40,7 @@ export function RecipeCard({
         />
       </Link>
 
-      <div className="p-3">
+      <div className="p-3 flex flex-col flex-1">
         <h3 className="text-sm font-medium leading-snug line-clamp-2 mb-2">
           <Link
             href={`/detail/${recipeId}`}
@@ -50,7 +50,7 @@ export function RecipeCard({
           </Link>
         </h3>
 
-        <div className="flex items-center justify-between">
+        <div className="mt-auto flex items-center justify-between">
           <div className="flex items-center gap-1 text-xs text-[var(--color-on-surface-variant)]">
             <Clock className="w-3.5 h-3.5" />
             <span>
