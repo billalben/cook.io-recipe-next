@@ -29,7 +29,7 @@ export function RecipeCard({
     >
       <Link
         href={`/detail/${recipeId}`}
-        className="block aspect-square overflow-hidden relative"
+        className="relative block grow aspect-square min-h-0 overflow-hidden"
       >
         <Image
           src={image}
@@ -40,8 +40,8 @@ export function RecipeCard({
         />
       </Link>
 
-      <div className="p-3 flex flex-col flex-1">
-        <h3 className="text-sm font-medium leading-snug line-clamp-2 mb-2">
+      <div className="p-3 flex flex-col shrink-0">
+        <h3 className="text-sm font-medium leading-snug line-clamp-2 mb-2 min-h-10">
           <Link
             href={`/detail/${recipeId}`}
             className="text-[var(--color-on-surface)] hover:text-primary transition-colors"

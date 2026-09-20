@@ -1,61 +1,96 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { RecipeCard } from "@/components/recipe-card";
 import { SkeletonCard } from "@/components/skeleton-card";
 import { CARD_FIELDS, type Hit, type EdamamResponse } from "@/lib/types";
 
 const MEAL_TYPES = ["Breakfast", "Lunch", "Dinner", "Snack", "Teatime"] as const;
+const DEFAULT_MEAL_TYPE = "Breakfast";
+const MEAL_PARAM = "mealType";
 
 export function MealTabs() {
-  const [activeTab, setActiveTab] = useState<string>("Breakfast");
-  const [loadedTabs, setLoadedTabs] = useState<Set<string>>(() => {
-    const loaded = new Set<string>();
-    fetchTabData("Breakfast", loaded);
-    return loaded;
-  });
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const param = searchParams.get(MEAL_PARAM)?.toLowerCase();
+  const activeTab =
+    MEAL_TYPES.find((type) => type.toLowerCase() === param) ?? DEFAULT_MEAL_TYPE;
+
   const [tabData, setTabData] = useState<Record<string, Hit[]>>({});
-  const [error, setError] = useState<string | null>(null);
+  const [loadedTabs, setLoadedTabs] = useState<Set<string>>(() => new Set());
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
-  async function fetchTabData(mealType: string, currentLoaded: Set<string>) {
-    if (currentLoaded.has(mealType)) return;
-    try {
-      const params = new URLSearchParams({
-        type: "public",
-        mealType: mealType.toLowerCase(),
-      });
-      for (const field of CARD_FIELDS) {
-        params.append("field", field);
-      }
-      const res = await fetch(`/api/recipes?${params.toString()}`);
-      if (!res.ok) {
-        const body = await res.json().catch(() => null);
-        throw new Error(
-          body?.message ||
-            body?.errors?.[0]?.error ||
-            body?.error ||
-            `Request failed (${res.status})`
-        );
-      }
-      const data: EdamamResponse = await res.json();
-      const recipes = data.hits?.slice(0, 12) ?? [];
-      setTabData((prev) => ({ ...prev, [mealType]: recipes }));
-      setError(null);
-    } catch (err) {
-      setError((err as Error).message);
-    } finally {
-      setLoadedTabs((prev) => new Set(prev).add(mealType));
-    }
-  }
+  useEffect(() => {
+    const isValid = MEAL_TYPES.some((type) => type.toLowerCase() === param);
+    if (isValid) return;
+    const params = new URLSearchParams(searchParams.toString());
+    params.set(MEAL_PARAM, DEFAULT_MEAL_TYPE.toLowerCase());
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+  }, [param, pathname, router, searchParams]);
 
-  const handleTabClick = useCallback((mealType: string) => {
-    setActiveTab(mealType);
-    setLoadedTabs((prev) => {
-      if (prev.has(mealType)) return prev;
-      fetchTabData(mealType, prev);
-      return prev;
+  useEffect(() => {
+    if (loadedTabs.has(activeTab)) return;
+    let cancelled = false;
+
+    const params = new URLSearchParams({
+      type: "public",
+      mealType: activeTab.toLowerCase(),
     });
-  }, []);
+    for (const field of CARD_FIELDS) {
+      params.append("field", field);
+    }
+
+    fetch(`/api/recipes?${params.toString()}`)
+      .then(async (res) => {
+        if (!res.ok) {
+          const body = await res.json().catch(() => null);
+          throw new Error(
+            body?.message ||
+              body?.errors?.[0]?.error ||
+              body?.error ||
+              `Request failed (${res.status})`
+          );
+        }
+        return res.json();
+      })
+      .then((data: EdamamResponse) => {
+        if (cancelled) return;
+        setTabData((prev) => ({
+          ...prev,
+          [activeTab]: data.hits?.slice(0, 12) ?? [],
+        }));
+        setErrors((prev) => {
+          if (!prev[activeTab]) return prev;
+          const next = { ...prev };
+          delete next[activeTab];
+          return next;
+        });
+      })
+      .catch((err: Error) => {
+        if (cancelled) return;
+        setErrors((prev) => ({ ...prev, [activeTab]: err.message }));
+      })
+      .finally(() => {
+        if (cancelled) return;
+        setLoadedTabs((prev) => new Set(prev).add(activeTab));
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [activeTab, loadedTabs]);
+
+  const handleTabClick = useCallback(
+    (mealType: string) => {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set(MEAL_PARAM, mealType.toLowerCase());
+      router.push(`${pathname}?${params.toString()}`, { scroll: false });
+    },
+    [pathname, router, searchParams]
+  );
 
   const handleKeyDown = (e: React.KeyboardEvent, currentIndex: number) => {
     let targetIndex = currentIndex;
@@ -103,9 +138,9 @@ export function MealTabs() {
                   <SkeletonCard key={i} />
                 ))}
               </div>
-            ) : error ? (
+            ) : errors[type] ? (
               <p className="text-center py-12 text-red-500">
-                Couldn&apos;t load recipes: {error}
+                Couldn&apos;t load recipes: {errors[type]}
               </p>
             ) : (
               <>
