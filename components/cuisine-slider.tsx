@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { RecipeCard } from "@/components/recipe-card";
 import { SkeletonCard } from "@/components/skeleton-card";
+import { Carousel } from "@/components/carousel";
 import { ChevronRight } from "lucide-react";
 import { CARD_FIELDS, type EdamamResponse } from "@/lib/types";
 
@@ -85,10 +86,11 @@ export function CuisineSliders() {
                 Couldn&apos;t load recipes: {error}
               </p>
             ) : (
-              <div className="flex gap-4 overflow-x-auto pb-4">
+              <Carousel ariaLabel={`Latest ${cuisine.label} recipes`}>
                 {(data[cuisine.label]?.hits ?? []).map((hit) => (
                   <div
                     key={hit.recipe.uri}
+                    data-carousel-item
                     className="min-w-[180px] max-w-[200px] flex-shrink-0"
                   >
                     <RecipeCard
@@ -99,16 +101,21 @@ export function CuisineSliders() {
                     />
                   </div>
                 ))}
-                <a
-                  href={`/recipes?cuisineType=${cuisine.type}`}
-                  className="min-w-[180px] max-w-[200px] flex-shrink-0 h-full flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-[var(--color-outline)] hover:border-primary transition-colors p-6 gap-2"
+                <div
+                  data-carousel-item
+                  className="min-w-[180px] max-w-[200px] flex-shrink-0"
                 >
-                  <span className="text-sm font-medium text-[var(--color-on-surface)]">
-                    Show More
-                  </span>
-                  <ChevronRight className="w-5 h-5 text-[var(--color-on-surface-variant)]" />
-                </a>
-              </div>
+                  <a
+                    href={`/recipes?cuisineType=${cuisine.type}`}
+                    className="h-full flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-[var(--color-outline)] hover:border-primary transition-colors p-6 gap-2"
+                  >
+                    <span className="text-sm font-medium text-[var(--color-on-surface)]">
+                      Show More
+                    </span>
+                    <ChevronRight className="w-5 h-5 text-[var(--color-on-surface-variant)]" />
+                  </a>
+                </div>
+              </Carousel>
             )}
           </div>
         </div>
