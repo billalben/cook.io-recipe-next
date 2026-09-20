@@ -6,8 +6,7 @@ import { RecipeCard } from "@/components/recipe-card";
 import { SkeletonCard } from "@/components/skeleton-card";
 import { FilterBar } from "@/components/filter-bar";
 import { CARD_FIELDS, type EdamamResponse } from "@/lib/types";
-
-const DEFAULT_MEAL_TYPES = "breakfast,dinner,lunch,snack,teatime";
+import { DEFAULT_MEAL_TYPES, FILTER_KEYS } from "@/lib/filter-data";
 
 export function RecipesPageContent() {
   const searchParams = useSearchParams();
@@ -20,16 +19,21 @@ export function RecipesPageContent() {
       params.append("field", field);
     }
 
-    if (!Array.from(searchParams.keys()).some((k) =>
-      ["mealType", "dishType", "cuisineType", "diet", "health", "time", "ingr", "calories", "q"].includes(k)
-    )) {
-      params.set("mealType", DEFAULT_MEAL_TYPES);
+    if (!FILTER_KEYS.some((key) => searchParams.has(key))) {
+      for (const mealType of DEFAULT_MEAL_TYPES) {
+        params.append("mealType", mealType);
+      }
     }
 
     return params.toString();
   }, [searchParams]);
 
-  return <RecipesGrid key={paramsString} paramsString={paramsString} />;
+  return (
+    <div className="flex flex-col md:flex-row min-h-[calc(100vh-var(--header-height))]">
+      <FilterBar />
+      <RecipesGrid key={paramsString} paramsString={paramsString} />
+    </div>
+  );
 }
 
 function RecipesGrid({ paramsString }: { paramsString: string }) {
@@ -143,13 +147,10 @@ function RecipesGrid({ paramsString }: { paramsString: string }) {
   }, [state.nextUrl, state.loadingMore, handleLoadMore]);
 
   return (
-    <div className="flex flex-col md:flex-row min-h-[calc(100vh-var(--header-height))]">
-      <FilterBar />
-
-      <div className="flex-1 p-4 md:p-6">
-        <h2 className="font-display text-xl md:text-2xl text-[var(--color-on-surface)] mb-6">
-          All Recipes
-        </h2>
+    <div className="flex-1 p-4 md:p-6">
+      <h2 className="font-display text-xl md:text-2xl text-[var(--color-on-surface)] mb-6">
+        All Recipes
+      </h2>
 
         {!state.hasLoaded ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -197,7 +198,6 @@ function RecipesGrid({ paramsString }: { paramsString: string }) {
             )}
           </>
         )}
-      </div>
     </div>
   );
 }

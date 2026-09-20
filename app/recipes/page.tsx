@@ -1,7 +1,24 @@
 import { Suspense } from "react";
+import { redirect } from "next/navigation";
+import { DEFAULT_MEAL_TYPES, FILTER_KEYS } from "@/lib/filter-data";
 import { RecipesPageContent } from "./recipes-content";
 
-export default function RecipesPage() {
+interface RecipesPageProps {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}
+
+export default async function RecipesPage({ searchParams }: RecipesPageProps) {
+  const params = await searchParams;
+  const hasFilter = FILTER_KEYS.some((key) => params[key] !== undefined);
+
+  if (!hasFilter) {
+    const defaults = new URLSearchParams();
+    for (const mealType of DEFAULT_MEAL_TYPES) {
+      defaults.append("mealType", mealType);
+    }
+    redirect(`/recipes?${defaults.toString()}`);
+  }
+
   return (
     <Suspense fallback={<RecipesSkeleton />}>
       <RecipesPageContent />

@@ -5,6 +5,14 @@ export interface FilterSection {
   options: { value: string; label: string }[];
 }
 
+export const DEFAULT_MEAL_TYPES = [
+  "breakfast",
+  "dinner",
+  "lunch",
+  "snack",
+  "teatime",
+];
+
 export const FILTER_DATA: FilterSection[] = [
   {
     key: "time",
@@ -170,6 +178,11 @@ export const FILTER_DATA: FilterSection[] = [
       { value: "world", label: "World" },
     ],
   },
+];
+
+export const FILTER_KEYS = [
+  ...FILTER_DATA.map((section) => section.key),
+  "q",
 ];
 
 export const HEALTH_TAGS = [

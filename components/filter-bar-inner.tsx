@@ -8,24 +8,38 @@ import { FILTER_DATA } from "@/lib/filter-data";
 
 interface FilterBarInnerProps {
   initialSearchParams: ReadonlyURLSearchParams;
+  expandedSections: Set<string>;
+  onToggleSection: (sectionKey: string) => void;
 }
 
-export function FilterBarInner({ initialSearchParams }: FilterBarInnerProps) {
+function parseCheckedValues(
+  params: URLSearchParams
+): Record<string, string[]> {
+  const values: Record<string, string[]> = {};
+  for (const [key, value] of params.entries()) {
+    if (key === "q" || key === "type" || key === "field") continue;
+    if (!values[key]) values[key] = [];
+    values[key].push(value);
+  }
+  return values;
+}
+
+export function FilterBarInner({
+  initialSearchParams,
+  expandedSections,
+  onToggleSection,
+}: FilterBarInnerProps) {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [searchValue, setSearchValue] = useState(initialSearchParams.get("q") ?? "");
+  const [checkedValues, setCheckedValues] = useState<Record<string, string[]>>(
+    () => parseCheckedValues(initialSearchParams)
+  );
 
-  const { checkedValues, activeCount } = useMemo(() => {
-    const values: Record<string, string[]> = {};
-    let count = 0;
-    for (const [key, value] of initialSearchParams.entries()) {
-      if (key === "q" || key === "type" || key === "field") continue;
-      if (!values[key]) values[key] = [];
-      values[key].push(value);
-      count++;
-    }
-    return { checkedValues: values, activeCount: count };
-  }, [initialSearchParams]);
+  const activeCount = useMemo(
+    () => Object.values(checkedValues).reduce((sum, values) => sum + values.length, 0),
+    [checkedValues]
+  );
 
   const handleApply = useCallback(() => {
     const params = new URLSearchParams();
@@ -41,6 +55,8 @@ export function FilterBarInner({ initialSearchParams }: FilterBarInnerProps) {
   }, [checkedValues, searchValue, router]);
 
   const handleClear = useCallback(() => {
+    setSearchValue("");
+    setCheckedValues({});
     router.push("/recipes");
   }, [router]);
 
@@ -50,27 +66,16 @@ export function FilterBarInner({ initialSearchParams }: FilterBarInnerProps) {
   };
 
   const handleCheck = (filterKey: string, value: string, isCheckbox: boolean) => {
-    const current = checkedValues[filterKey] ?? [];
-    const exists = current.includes(value);
-    const updated = isCheckbox
-      ? exists
-        ? current.filter((v) => v !== value)
-        : [...current, value]
-      : [value];
-
-    const params = new URLSearchParams();
-    if (searchValue.trim()) params.set("q", searchValue.trim());
-    for (const [key, values] of Object.entries(checkedValues)) {
-      if (key === filterKey) continue;
-      for (const val of values) {
-        params.append(key, val);
-      }
-    }
-    for (const val of updated) {
-      params.append(filterKey, val);
-    }
-    const qs = params.toString();
-    router.push(qs ? `/recipes?${qs}` : "/recipes");
+    setCheckedValues((prev) => {
+      const current = prev[filterKey] ?? [];
+      const exists = current.includes(value);
+      const updated = isCheckbox
+        ? exists
+          ? current.filter((v) => v !== value)
+          : [...current, value]
+        : [value];
+      return { ...prev, [filterKey]: updated };
+    });
   };
 
   const isChecked = (filterKey: string, value: string) => {
@@ -134,7 +139,8 @@ export function FilterBarInner({ initialSearchParams }: FilterBarInnerProps) {
             <Accordion
               key={section.key}
               label={section.label}
-              defaultExpanded={section.key === "mealType"}
+              expanded={expandedSections.has(section.key)}
+              onToggle={() => onToggleSection(section.key)}
             >
               <div className="space-y-1.5">
                 {section.options.map((opt) => (

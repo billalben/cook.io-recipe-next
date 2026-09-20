@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { DM_Sans, DM_Serif_Display } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Header } from "@/components/header";
-import { Footer } from "@/components/footer";
 import { Snackbar } from "@/components/snackbar";
 import "./globals.css";
 
@@ -42,7 +41,6 @@ export default function RootLayout({
           <main className="flex-1 pt-[var(--header-height)] pb-[var(--mobile-nav-height)] md:pb-0">
             {children}
           </main>
-          <Footer />
           <Snackbar />
         </ThemeProvider>
       </body>
