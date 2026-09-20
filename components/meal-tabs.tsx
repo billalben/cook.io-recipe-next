@@ -3,11 +3,9 @@
 import { useState, useCallback } from "react";
 import { RecipeCard } from "@/components/recipe-card";
 import { SkeletonCard } from "@/components/skeleton-card";
-import type { Hit, EdamamResponse } from "@/lib/types";
+import { CARD_FIELDS, type Hit, type EdamamResponse } from "@/lib/types";
 
 const MEAL_TYPES = ["Breakfast", "Lunch", "Dinner", "Snack", "Teatime"] as const;
-
-const CARD_FIELDS = "uri,label,image,totalTime";
 
 export function MealTabs() {
   const [activeTab, setActiveTab] = useState<string>("Breakfast");
@@ -17,6 +15,7 @@ export function MealTabs() {
     return loaded;
   });
   const [tabData, setTabData] = useState<Record<string, Hit[]>>({});
+  const [error, setError] = useState<string | null>(null);
 
   async function fetchTabData(mealType: string, currentLoaded: Set<string>) {
     if (currentLoaded.has(mealType)) return;
@@ -24,15 +23,28 @@ export function MealTabs() {
       const params = new URLSearchParams({
         type: "public",
         mealType: mealType.toLowerCase(),
-        field: CARD_FIELDS,
       });
+      for (const field of CARD_FIELDS) {
+        params.append("field", field);
+      }
       const res = await fetch(`/api/recipes?${params.toString()}`);
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        throw new Error(
+          body?.message ||
+            body?.errors?.[0]?.error ||
+            body?.error ||
+            `Request failed (${res.status})`
+        );
+      }
       const data: EdamamResponse = await res.json();
       const recipes = data.hits?.slice(0, 12) ?? [];
       setTabData((prev) => ({ ...prev, [mealType]: recipes }));
+      setError(null);
+    } catch (err) {
+      setError((err as Error).message);
+    } finally {
       setLoadedTabs((prev) => new Set(prev).add(mealType));
-    } catch {
-      // tab stays as skeleton
     }
   }
 
@@ -91,6 +103,10 @@ export function MealTabs() {
                   <SkeletonCard key={i} />
                 ))}
               </div>
+            ) : error ? (
+              <p className="text-center py-12 text-red-500">
+                Couldn&apos;t load recipes: {error}
+              </p>
             ) : (
               <>
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">

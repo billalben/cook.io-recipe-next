@@ -4,9 +4,7 @@ import { useEffect, useState } from "react";
 import { RecipeCard } from "@/components/recipe-card";
 import { SkeletonCard } from "@/components/skeleton-card";
 import { ChevronRight } from "lucide-react";
-import type { EdamamResponse } from "@/lib/types";
-
-const CARD_FIELDS = "uri,label,image,totalTime";
+import { CARD_FIELDS, type EdamamResponse } from "@/lib/types";
 
 const CUISINES = [
   { label: "Asian", type: "asian" },
@@ -16,6 +14,7 @@ const CUISINES = [
 export function CuisineSliders() {
   const [data, setData] = useState<Record<string, EdamamResponse | null>>({});
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -23,23 +22,37 @@ export function CuisineSliders() {
     async function load() {
       setLoading(true);
       const results: Record<string, EdamamResponse | null> = {};
+      let firstError: string | null = null;
 
       for (const cuisine of CUISINES) {
         try {
           const params = new URLSearchParams({
             type: "public",
             cuisineType: cuisine.type,
-            field: CARD_FIELDS,
           });
+          for (const field of CARD_FIELDS) {
+            params.append("field", field);
+          }
           const res = await fetch(`/api/recipes?${params.toString()}`);
+          if (!res.ok) {
+            const body = await res.json().catch(() => null);
+            throw new Error(
+              body?.message ||
+                body?.errors?.[0]?.error ||
+                body?.error ||
+                `Request failed (${res.status})`
+            );
+          }
           results[cuisine.label] = await res.json();
-        } catch {
+        } catch (err) {
           results[cuisine.label] = null;
+          firstError ??= (err as Error).message;
         }
       }
 
       if (!cancelled) {
         setData(results);
+        setError(firstError);
         setLoading(false);
       }
     }
@@ -67,6 +80,10 @@ export function CuisineSliders() {
                   </div>
                 ))}
               </div>
+            ) : error && !data[cuisine.label] ? (
+              <p className="text-center py-12 text-red-500">
+                Couldn&apos;t load recipes: {error}
+              </p>
             ) : (
               <div className="flex gap-4 overflow-x-auto pb-4">
                 {(data[cuisine.label]?.hits ?? []).map((hit) => (

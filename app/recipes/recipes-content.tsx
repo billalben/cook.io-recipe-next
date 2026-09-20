@@ -5,9 +5,8 @@ import { useSearchParams } from "next/navigation";
 import { RecipeCard } from "@/components/recipe-card";
 import { SkeletonCard } from "@/components/skeleton-card";
 import { FilterBar } from "@/components/filter-bar";
-import type { EdamamResponse } from "@/lib/types";
+import { CARD_FIELDS, type EdamamResponse } from "@/lib/types";
 
-const CARD_FIELDS = "uri,label,image,totalTime";
 const DEFAULT_MEAL_TYPES = "breakfast,dinner,lunch,snack,teatime";
 
 export function RecipesPageContent() {
@@ -16,7 +15,10 @@ export function RecipesPageContent() {
   const paramsString = useMemo(() => {
     const params = new URLSearchParams(searchParams.toString());
     params.set("type", "public");
-    params.set("field", CARD_FIELDS);
+    params.delete("field");
+    for (const field of CARD_FIELDS) {
+      params.append("field", field);
+    }
 
     if (!Array.from(searchParams.keys()).some((k) =>
       ["mealType", "dishType", "cuisineType", "diet", "health", "time", "ingr", "calories", "q"].includes(k)
@@ -36,11 +38,13 @@ function RecipesGrid({ paramsString }: { paramsString: string }) {
     nextUrl: string | null;
     hasLoaded: boolean;
     loadingMore: boolean;
+    error: string | null;
   }>({
     recipes: [],
     nextUrl: null,
     hasLoaded: false,
     loadingMore: false,
+    error: null,
   });
 
   const fetchingRef = useRef(false);
@@ -50,7 +54,18 @@ function RecipesGrid({ paramsString }: { paramsString: string }) {
     fetchingRef.current = true;
 
     fetch(`/api/recipes?${paramsString}`)
-      .then((res) => res.json())
+      .then(async (res) => {
+        if (!res.ok) {
+          const body = await res.json().catch(() => null);
+          throw new Error(
+            body?.message ||
+              body?.errors?.[0]?.error ||
+              body?.error ||
+              `Request failed (${res.status})`
+          );
+        }
+        return res.json();
+      })
       .then((data: EdamamResponse) => {
         if (cancelled) return;
         setState({
@@ -58,12 +73,18 @@ function RecipesGrid({ paramsString }: { paramsString: string }) {
           nextUrl: data._links?.next?.href ?? null,
           hasLoaded: true,
           loadingMore: false,
+          error: null,
         });
         fetchingRef.current = false;
       })
-      .catch(() => {
+      .catch((err: Error) => {
         if (cancelled) return;
-        setState((prev) => ({ ...prev, hasLoaded: true, loadingMore: false }));
+        setState((prev) => ({
+          ...prev,
+          hasLoaded: true,
+          loadingMore: false,
+          error: err.message,
+        }));
         fetchingRef.current = false;
       });
 
@@ -136,6 +157,10 @@ function RecipesGrid({ paramsString }: { paramsString: string }) {
               <SkeletonCard key={i} />
             ))}
           </div>
+        ) : state.error ? (
+          <p className="text-center py-12 text-red-500">
+            Couldn&apos;t load recipes: {state.error}
+          </p>
         ) : state.recipes.length === 0 ? (
           <p className="text-[var(--color-on-surface-variant)] text-center py-12">
             No recipes found. Try different filters.

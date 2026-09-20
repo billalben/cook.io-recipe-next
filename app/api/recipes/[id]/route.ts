@@ -6,21 +6,15 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const { searchParams } = request.nextUrl;
-  const queries: Record<string, string> = {};
-
-  searchParams.forEach((value, key) => {
-    queries[key] = value;
-  });
-
-  const url = buildEdamamUrl(queries, id);
+  const url = buildEdamamUrl(request.nextUrl.searchParams, id);
 
   try {
     const response = await fetch(url);
 
     if (!response.ok) {
+      const errorBody = await response.json().catch(() => null);
       return NextResponse.json(
-        { error: "Failed to fetch recipe" },
+        errorBody ?? { error: "Failed to fetch recipe" },
         { status: response.status }
       );
     }

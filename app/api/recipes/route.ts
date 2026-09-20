@@ -2,21 +2,15 @@ import { NextRequest, NextResponse } from "next/server";
 import { buildEdamamUrl } from "@/lib/api";
 
 export async function GET(request: NextRequest) {
-  const { searchParams } = request.nextUrl;
-  const queries: Record<string, string> = {};
-
-  searchParams.forEach((value, key) => {
-    queries[key] = value;
-  });
-
-  const url = buildEdamamUrl(queries);
+  const url = buildEdamamUrl(request.nextUrl.searchParams);
 
   try {
     const response = await fetch(url);
 
     if (!response.ok) {
+      const errorBody = await response.json().catch(() => null);
       return NextResponse.json(
-        { error: "Failed to fetch recipes" },
+        errorBody ?? { error: "Failed to fetch recipes" },
         { status: response.status }
       );
     }

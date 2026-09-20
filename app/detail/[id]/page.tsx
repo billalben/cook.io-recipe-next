@@ -10,7 +10,7 @@ interface Props {
 
 async function fetchRecipe(id: string): Promise<Recipe | null> {
   try {
-    const url = buildEdamamUrl({}, id);
+    const url = buildEdamamUrl(undefined, id);
     const res = await fetch(url, { next: { revalidate: 3600 } });
     if (!res.ok) return null;
     const data = await res.json();
