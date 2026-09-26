@@ -90,7 +90,10 @@ export async function fetchEdamamDetail(id: string): Promise<Recipe | null> {
   const raw = await fetchEdamamJson(undefined, id);
   const parsed = RecipeDetailSchema.safeParse(raw);
 
-  if (!parsed.success) return null;
+  if (!parsed.success) {
+    console.error("Failed to parse recipe detail", parsed.error);
+    return null;
+  }
   return parsed.data.recipe ?? null;
 }
 

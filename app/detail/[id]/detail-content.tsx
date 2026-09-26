@@ -65,7 +65,9 @@ export function DetailContent({ recipe, recipeId }: DetailContentProps) {
         <div className="grid grid-cols-3 gap-4 mb-8">
           <div className="bg-(--color-outline-variant) rounded-xl p-4 text-center">
             <div className="text-2xl font-bold text-(--color-on-surface)">
-              {recipe.ingredients?.length ?? 0}
+              {recipe.ingredientLines?.length ??
+                recipe.ingredients?.length ??
+                0}
             </div>
             <div className="text-xs text-(--color-on-surface-variant) mt-1">
               Ingredients

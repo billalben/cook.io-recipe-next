@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useCallback, useSyncExternalStore } from "react";
 import { Bookmark } from "lucide-react";
 import { extractRecipeId } from "@/lib/utils";
 import type { CardRecipe } from "@/lib/types";
@@ -27,17 +27,29 @@ function removeStoredRecipe(recipeId: string) {
   window.localStorage.removeItem(`cookio-recipe${recipeId}`);
 }
 
+function subscribe(onStoreChange: () => void) {
+  window.addEventListener("storage", onStoreChange);
+  window.addEventListener("snackbar", onStoreChange);
+  return () => {
+    window.removeEventListener("storage", onStoreChange);
+    window.removeEventListener("snackbar", onStoreChange);
+  };
+}
+
 interface SaveButtonProps {
   recipeId: string;
 }
 
 export function SaveButton({ recipeId }: SaveButtonProps) {
-  const [isSaved, setIsSaved] = useState(() => !!getStoredRecipe(recipeId));
+  const isSaved = useSyncExternalStore(
+    subscribe,
+    () => !!getStoredRecipe(recipeId),
+    () => false
+  );
 
   const handleClick = useCallback(async () => {
     if (isSaved) {
       removeStoredRecipe(recipeId);
-      setIsSaved(false);
       window.dispatchEvent(new CustomEvent("snackbar", { detail: "Removed from Recipe book" }));
       return;
     }
@@ -58,7 +70,6 @@ export function SaveButton({ recipeId }: SaveButtonProps) {
           cookingTime: recipe.totalTime,
         };
         storeRecipe(recipeId, cardRecipe);
-        setIsSaved(true);
         window.dispatchEvent(new CustomEvent("snackbar", { detail: "Added to Recipe book" }));
       }
     } catch (err) {

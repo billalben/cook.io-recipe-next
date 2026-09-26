@@ -19,12 +19,12 @@ export const EdamamImagesSchema = z
 
 export const RecipeIngredientSchema = z
   .object({
-    text: z.string(),
-    quantity: z.number(),
+    text: z.string().catch(""),
+    quantity: z.number().catch(0),
     measure: z.string().nullable().optional(),
-    food: z.string(),
-    weight: z.number(),
-    foodId: z.string(),
+    food: z.string().catch(""),
+    weight: z.number().catch(0),
+    foodId: z.string().catch(""),
   })
   .loose();
 
