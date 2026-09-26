@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { RecipeCard } from "@/components/recipe-card";
 import { SkeletonCard } from "@/components/skeleton-card";
 import { ErrorState } from "@/components/error-state";
@@ -25,11 +26,9 @@ export function CuisineSliders() {
     async function load() {
       setLoading(true);
       setError(null);
-      const results: Record<string, EdamamResponse | null> = {};
-      let firstError: string | null = null;
 
-      for (const cuisine of CUISINES) {
-        try {
+      const settled = await Promise.allSettled(
+        CUISINES.map(async (cuisine) => {
           const params = new URLSearchParams({
             type: "public",
             cuisineType: cuisine.type,
@@ -47,18 +46,27 @@ export function CuisineSliders() {
                 `Request failed (${res.status})`
             );
           }
-          results[cuisine.label] = await res.json();
-        } catch (err) {
-          results[cuisine.label] = null;
-          firstError ??= (err as Error).message;
-        }
-      }
+          return (await res.json()) as EdamamResponse;
+        })
+      );
 
-      if (!cancelled) {
-        setData(results);
-        setError(firstError);
-        setLoading(false);
-      }
+      if (cancelled) return;
+
+      const results: Record<string, EdamamResponse | null> = {};
+      let firstError: string | null = null;
+      settled.forEach((outcome, i) => {
+        const label = CUISINES[i].label;
+        if (outcome.status === "fulfilled") {
+          results[label] = outcome.value;
+        } else {
+          results[label] = null;
+          firstError ??= (outcome.reason as Error)?.message || "Failed to load recipes";
+        }
+      });
+
+      setData(results);
+      setError(firstError);
+      setLoading(false);
     }
 
     load();
@@ -108,7 +116,7 @@ export function CuisineSliders() {
                   data-carousel-item
                   className="min-w-[180px] max-w-[200px] flex-shrink-0"
                 >
-                  <a
+                  <Link
                     href={`/recipes?cuisineType=${cuisine.type}`}
                     className="h-full flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-[var(--color-outline)] hover:border-primary transition-colors p-6 gap-2"
                   >
@@ -116,7 +124,7 @@ export function CuisineSliders() {
                       Show More
                     </span>
                     <ChevronRight className="w-5 h-5 text-[var(--color-on-surface-variant)]" />
-                  </a>
+                  </Link>
                 </div>
               </Carousel>
             )}

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { EdamamError, fetchEdamamDetail, friendlyErrorMessage } from "@/lib/edamam";
 import { isValidRecipeId } from "@/lib/filter-validation";
+import { getBestImage } from "@/lib/utils";
 import { ErrorState } from "@/components/error-state";
 import { DetailContent } from "./detail-content";
 import type { Recipe } from "@/lib/types";
@@ -49,13 +50,26 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   const { recipe } = result;
+  const description = `${recipe.label} by ${recipe.source}. ${recipe.ingredientLines?.length ?? 0} ingredients.`;
+  const image = getBestImage(recipe.images).url || recipe.image;
+  const images = image ? [image] : undefined;
+
   return {
     title: `${recipe.label} — Cook.io`,
-    description: `${recipe.label} by ${recipe.source}. ${recipe.ingredientLines?.length ?? 0} ingredients.`,
+    description,
+    alternates: {
+      canonical: `/detail/${id}`,
+    },
     openGraph: {
       title: recipe.label,
       description: `Recipe by ${recipe.source}`,
-      images: [recipe.image],
+      images,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: recipe.label,
+      description: `Recipe by ${recipe.source}`,
+      images,
     },
   };
 }

@@ -1,8 +1,18 @@
 import { Suspense } from "react";
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { DEFAULT_MEAL_TYPES, FILTER_KEYS } from "@/lib/filter-data";
 import { sanitizeRecipeSearchParams } from "@/lib/filter-validation";
 import { RecipesPageContent } from "./recipes-content";
+
+export const metadata: Metadata = {
+  title: "Recipes — Cook.io",
+  description:
+    "Search and filter thousands of recipes by cooking time, ingredients, calories, diet, health, and cuisine.",
+  alternates: {
+    canonical: "/recipes",
+  },
+};
 
 interface RecipesPageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>;

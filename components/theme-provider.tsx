@@ -22,6 +22,18 @@ function getServerSnapshot(): Theme {
   return "light";
 }
 
+function subscribeNoop() {
+  return () => {};
+}
+
+function getHydratedSnapshot() {
+  return true;
+}
+
+function getServerHydratedSnapshot() {
+  return false;
+}
+
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const subscribe = useCallback((onChange: () => void) => {
     window.addEventListener("themechange", onChange);
@@ -34,10 +46,16 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const theme = useSyncExternalStore(subscribe, getInitialTheme, getServerSnapshot);
+  const isHydrated = useSyncExternalStore(
+    subscribeNoop,
+    getHydratedSnapshot,
+    getServerHydratedSnapshot
+  );
 
   useEffect(() => {
+    if (!isHydrated) return;
     document.documentElement.dataset.theme = theme;
-  }, [theme]);
+  }, [isHydrated, theme]);
 
   const toggleTheme = useCallback(() => {
     const next: Theme = theme === "light" ? "dark" : "light";

@@ -84,7 +84,7 @@ export function SaveButton({ recipeId }: SaveButtonProps) {
   return (
     <button
       onClick={handleClick}
-      className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
+      className={`w-8 h-8 shrink-0 rounded-full flex items-center justify-center transition-colors ${
         isSaved
           ? "text-primary bg-primary-container"
           : "text-[var(--color-on-surface-variant)] hover:bg-[var(--color-outline-variant)]"

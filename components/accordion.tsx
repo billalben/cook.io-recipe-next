@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, type ReactNode } from "react";
+import { useState, useRef, useId, type ReactNode } from "react";
 import { ChevronDown } from "lucide-react";
 
 interface AccordionProps {
@@ -22,6 +22,7 @@ export function Accordion({
   const isControlled = expanded !== undefined;
   const isExpanded = isControlled ? expanded : internalExpanded;
   const contentRef = useRef<HTMLDivElement>(null);
+  const panelId = useId();
 
   const handleToggle = () => {
     if (isControlled) {
@@ -34,8 +35,10 @@ export function Accordion({
   return (
     <div className="border-b border-[var(--color-outline)]">
       <button
+        type="button"
         onClick={handleToggle}
         aria-expanded={isExpanded}
+        aria-controls={panelId}
         className="w-full flex items-center justify-between py-3 text-sm font-medium text-[var(--color-on-surface)] hover:text-primary transition-colors"
       >
         {label}
@@ -47,6 +50,9 @@ export function Accordion({
       </button>
       <div
         ref={contentRef}
+        id={panelId}
+        aria-hidden={!isExpanded}
+        inert={!isExpanded}
         className="grid transition-all duration-200"
         style={{
           gridTemplateRows: isExpanded ? "1fr" : "0fr",

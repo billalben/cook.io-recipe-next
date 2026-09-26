@@ -46,10 +46,13 @@ export function Snackbar() {
     };
   }, [addMessage]);
 
-  if (messages.length === 0) return null;
-
   return (
-    <div className="fixed bottom-[calc(var(--mobile-nav-height)+16px)] md:bottom-6 left-1/2 -translate-x-1/2 z-[60] flex flex-col gap-2 items-center">
+    <div
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
+      className="fixed bottom-[calc(var(--mobile-nav-height)+16px)] md:bottom-6 left-1/2 -translate-x-1/2 z-[60] flex flex-col gap-2 items-center"
+    >
       {messages.map((msg) => (
         <div
           key={msg.id}

@@ -37,6 +37,7 @@ export function HeroSearch() {
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
+              aria-label="Search recipes"
               placeholder="Search recipes..."
               className="w-full py-3.5 pl-3 text-sm bg-transparent outline-none text-gray-800 placeholder-gray-400"
             />

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
+import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { RecipeCard } from "@/components/recipe-card";
 import { SkeletonCard } from "@/components/skeleton-card";
@@ -176,12 +177,12 @@ export function MealTabs() {
                   ))}
                 </div>
                 <div className="mt-6 text-center">
-                  <a
+                  <Link
                     href={`/recipes?mealType=${type.toLowerCase()}`}
                     className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full border border-[var(--color-outline)] text-sm font-medium text-[var(--color-on-surface)] hover:bg-[var(--color-outline-variant)] transition-colors"
                   >
                     Show more
-                  </a>
+                  </Link>
                 </div>
               </>
             )}
