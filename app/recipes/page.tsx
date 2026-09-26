@@ -56,16 +56,16 @@ export default async function RecipesPage({ searchParams }: RecipesPageProps) {
 function RecipesSkeleton() {
   return (
     <div className="flex flex-col md:flex-row">
-      <div className="w-full md:w-[300px] lg:w-[340px] shrink-0 md:border-r md:border-[var(--color-outline)] md:min-h-[calc(100vh-var(--header-height))]" />
+      <div className="w-full md:w-[300px] lg:w-[340px] shrink-0 md:border-r md:border-outline md:min-h-[calc(100vh-var(--header-height))]" />
       <div className="flex-1 p-4">
-        <h2 className="font-display text-xl md:text-2xl text-[var(--color-on-surface)] mb-6">
+        <h2 className="font-display text-xl md:text-2xl text-on-surface mb-6">
           All Recipes
         </h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
           {Array.from({ length: 12 }).map((_, i) => (
             <div
               key={i}
-              className="rounded-xl border border-[var(--color-outline)]"
+              className="rounded-xl border border-outline"
             >
               <div className="skeleton skeleton-card-banner" />
               <div className="p-3">

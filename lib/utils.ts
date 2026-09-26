@@ -1,3 +1,5 @@
+import type { EdamamImages } from "@/lib/types";
+
 export interface TimeResult {
   time: number;
   timeUnit: "days" | "hours" | "minutes";
@@ -17,10 +19,12 @@ export function getTime(minute: number): TimeResult {
 }
 
 export function extractRecipeId(uri: string): string {
-  return uri.slice(uri.lastIndexOf("_") + 1);
-}
+  const underscore = uri.lastIndexOf("_");
+  if (underscore !== -1) return uri.slice(underscore + 1);
 
-import type { EdamamImages } from "@/lib/types";
+  const slash = Math.max(uri.lastIndexOf("/"), uri.lastIndexOf("#"));
+  return slash !== -1 ? uri.slice(slash + 1) : uri;
+}
 
 type ImageInfo = { url: string; width: number; height: number };
 

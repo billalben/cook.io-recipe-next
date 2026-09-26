@@ -15,7 +15,7 @@ export function FilterBar() {
 
 function FilterBarShell() {
   return (
-    <aside className="hidden md:block w-[300px] lg:w-[340px] shrink-0 border-r border-[var(--color-outline)] md:min-h-[calc(100vh-var(--header-height))]" />
+    <aside className="hidden md:block w-[300px] lg:w-[340px] shrink-0 border-r border-outline md:min-h-[calc(100vh-var(--header-height))]" />
   );
 }
 

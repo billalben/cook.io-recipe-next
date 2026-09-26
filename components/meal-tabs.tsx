@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useId } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { RecipeCard } from "@/components/recipe-card";
@@ -21,6 +21,10 @@ export function MealTabs() {
   const param = normalizeMealType(searchParams.get(MEAL_PARAM));
   const activeTab =
     MEAL_TYPES.find((type) => type.toLowerCase() === param) ?? DEFAULT_MEAL_TYPE;
+
+  const idPrefix = useId();
+  const tabId = (type: string) => `${idPrefix}-tab-${type.toLowerCase()}`;
+  const panelId = (type: string) => `${idPrefix}-panel-${type.toLowerCase()}`;
 
   const [tabData, setTabData] = useState<Record<string, Hit[]>>({});
   const [loadedTabs, setLoadedTabs] = useState<Set<string>>(() => new Set());
@@ -125,19 +129,25 @@ export function MealTabs() {
   return (
     <section className="py-8">
       <div className="mx-auto max-w-7xl px-4">
-        <div className="flex gap-2 overflow-x-auto pb-3 mb-6" role="tablist">
+        <div
+          className="flex gap-2 overflow-x-auto pb-3 mb-6"
+          role="tablist"
+          aria-label="Meal types"
+        >
           {MEAL_TYPES.map((type, i) => (
             <button
               key={type}
+              id={tabId(type)}
               role="tab"
               aria-selected={activeTab === type}
+              aria-controls={panelId(type)}
               tabIndex={activeTab === type ? 0 : -1}
               onClick={() => handleTabClick(type)}
               onKeyDown={(e) => handleKeyDown(e, i)}
               className={`px-5 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
                 activeTab === type
                   ? "bg-primary text-on-primary"
-                  : "bg-[var(--color-outline-variant)] text-[var(--color-on-surface-variant)] hover:bg-[var(--color-outline)]"
+                  : "bg-outline-variant text-on-surface-variant hover:bg-outline"
               }`}
             >
               {type}
@@ -148,7 +158,10 @@ export function MealTabs() {
         {MEAL_TYPES.map((type) => (
           <div
             key={type}
+            id={panelId(type)}
             role="tabpanel"
+            aria-labelledby={tabId(type)}
+            tabIndex={0}
             hidden={activeTab !== type}
           >
             {isTabLoading(type) ? (
@@ -179,7 +192,7 @@ export function MealTabs() {
                 <div className="mt-6 text-center">
                   <Link
                     href={`/recipes?mealType=${type.toLowerCase()}`}
-                    className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full border border-[var(--color-outline)] text-sm font-medium text-[var(--color-on-surface)] hover:bg-[var(--color-outline-variant)] transition-colors"
+                    className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full border border-outline text-sm font-medium text-on-surface hover:bg-outline-variant transition-colors"
                   >
                     Show more
                   </Link>

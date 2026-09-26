@@ -38,14 +38,14 @@ export function ErrorState({ message, onRetry, compact = false }: ErrorStateProp
       </div>
 
       <h3
-        className={`font-display text-[var(--color-on-surface)] ${
+        className={`font-display text-on-surface ${
           compact ? "text-base" : "text-lg"
         }`}
       >
         Recipes are taking a break
       </h3>
 
-      <p className="text-sm text-[var(--color-on-surface-variant)] max-w-sm">
+      <p className="text-sm text-on-surface-variant max-w-sm">
         {message}
       </p>
 

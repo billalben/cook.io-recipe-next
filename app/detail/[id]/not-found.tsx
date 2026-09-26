@@ -7,10 +7,10 @@ export default function RecipeNotFound() {
       <div className="w-16 h-16 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center">
         <UtensilsCrossed className="w-7 h-7" />
       </div>
-      <h1 className="font-display text-2xl text-[var(--color-on-surface)]">
+      <h1 className="font-display text-2xl text-on-surface">
         This recipe doesn&apos;t exist
       </h1>
-      <p className="text-sm text-[var(--color-on-surface-variant)] max-w-sm">
+      <p className="text-sm text-on-surface-variant max-w-sm">
         We couldn&apos;t find the recipe you were looking for. It may have been
         removed or the link could be incorrect.
       </p>
@@ -23,7 +23,7 @@ export default function RecipeNotFound() {
         </Link>
         <Link
           href="/"
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-[var(--color-outline)] text-[var(--color-on-surface)] text-sm font-medium hover:bg-[var(--color-outline-variant)] transition-colors"
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-outline text-on-surface text-sm font-medium hover:bg-outline-variant transition-colors"
         >
           Back to home
         </Link>

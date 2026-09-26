@@ -56,7 +56,7 @@ export function Snackbar() {
       {messages.map((msg) => (
         <div
           key={msg.id}
-          className={`px-4 py-2.5 rounded-lg bg-[var(--color-on-surface)] text-[var(--color-surface)] text-sm font-medium shadow-lg ${
+          className={`px-4 py-2.5 rounded-lg bg-on-surface text-surface text-sm font-medium shadow-lg ${
             msg.state === "in" ? "animate-snackbar-in" : "animate-snackbar-out"
           }`}
         >

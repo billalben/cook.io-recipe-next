@@ -87,8 +87,9 @@ export function SaveButton({ recipeId }: SaveButtonProps) {
       className={`w-8 h-8 shrink-0 rounded-full flex items-center justify-center transition-colors ${
         isSaved
           ? "text-primary bg-primary-container"
-          : "text-[var(--color-on-surface-variant)] hover:bg-[var(--color-outline-variant)]"
+          : "text-on-surface-variant hover:bg-outline-variant"
       }`}
+      aria-pressed={isSaved}
       aria-label={isSaved ? "Remove from saved recipes" : "Add to saved recipes"}
     >
       <Bookmark

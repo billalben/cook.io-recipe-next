@@ -139,7 +139,7 @@ export function Carousel({ children, ariaLabel, className }: CarouselProps) {
         onClick={() => scrollByCard(-1)}
         disabled={!canScrollLeft}
         aria-label="Scroll left"
-        className="absolute -left-4 top-1/2 z-20 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-[var(--color-outline)] bg-[var(--color-surface)] text-[var(--color-on-surface)] shadow-lg transition duration-200 hover:scale-105 hover:bg-[var(--color-outline-variant)] hover:shadow-xl active:scale-95 disabled:pointer-events-none disabled:opacity-0 md:flex"
+        className="absolute -left-4 top-1/2 z-20 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-outline bg-surface text-on-surface shadow-lg transition duration-200 hover:scale-105 hover:bg-outline-variant hover:shadow-xl active:scale-95 disabled:pointer-events-none disabled:opacity-0 md:flex"
       >
         <ChevronLeft className="h-5 w-5" />
       </button>
@@ -148,10 +148,11 @@ export function Carousel({ children, ariaLabel, className }: CarouselProps) {
         ref={scrollRef}
         role="region"
         aria-label={ariaLabel}
+        tabIndex={0}
         onPointerDown={handlePointerDown}
         onClickCapture={handleClickCapture}
         onDragStart={handleDragStart}
-        className={`no-scrollbar flex gap-4 overflow-x-auto px-2 pb-4 select-none ${
+        className={`no-scrollbar flex gap-4 overflow-x-auto px-2 pb-4 select-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
           isDragging ? "cursor-grabbing" : "cursor-grab"
         }`}
       >
@@ -163,7 +164,7 @@ export function Carousel({ children, ariaLabel, className }: CarouselProps) {
         onClick={() => scrollByCard(1)}
         disabled={!canScrollRight}
         aria-label="Scroll right"
-        className="absolute -right-4 top-1/2 z-20 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-[var(--color-outline)] bg-[var(--color-surface)] text-[var(--color-on-surface)] shadow-lg transition duration-200 hover:scale-105 hover:bg-[var(--color-outline-variant)] hover:shadow-xl active:scale-95 disabled:pointer-events-none disabled:opacity-0 md:flex"
+        className="absolute -right-4 top-1/2 z-20 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-outline bg-surface text-on-surface shadow-lg transition duration-200 hover:scale-105 hover:bg-outline-variant hover:shadow-xl active:scale-95 disabled:pointer-events-none disabled:opacity-0 md:flex"
       >
         <ChevronRight className="h-5 w-5" />
       </button>

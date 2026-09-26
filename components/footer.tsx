@@ -1,7 +1,7 @@
 export function Footer() {
   return (
-    <footer className="mt-auto py-6 border-t border-[var(--color-outline)] bg-[var(--color-surface)]">
-      <div className="mx-auto max-w-7xl px-4 flex flex-col items-center gap-2 text-sm text-[var(--color-on-surface-variant)]">
+    <footer className="mt-auto py-6 border-t border-outline bg-surface">
+      <div className="mx-auto max-w-7xl px-4 flex flex-col items-center gap-2 text-sm text-on-surface-variant">
         <p>
           &copy; {new Date().getFullYear()}{" "}
           <span className="font-display text-primary">Cook.io</span>. Built by

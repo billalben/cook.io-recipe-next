@@ -180,7 +180,7 @@ function RecipesGrid({ paramsString }: { paramsString: string }) {
 
   return (
     <div className="flex-1 p-4 md:p-6">
-      <h2 className="font-display text-xl md:text-2xl text-[var(--color-on-surface)] mb-6">
+      <h2 className="font-display text-xl md:text-2xl text-on-surface mb-6">
         All Recipes
       </h2>
 
@@ -193,7 +193,7 @@ function RecipesGrid({ paramsString }: { paramsString: string }) {
       ) : state.error ? (
         <ErrorState message={state.error} onRetry={handleRetry} />
       ) : state.recipes.length === 0 ? (
-        <p className="text-[var(--color-on-surface-variant)] text-center py-12">
+        <p className="text-on-surface-variant text-center py-12">
           No recipes found. Try different filters.
         </p>
       ) : (
@@ -230,7 +230,7 @@ function RecipesGrid({ paramsString }: { paramsString: string }) {
           )}
 
           {!state.nextUrl && !state.loadMoreError && state.hasLoaded && (
-            <p className="text-center text-[var(--color-on-surface-variant)] py-8 text-sm">
+            <p className="text-center text-on-surface-variant py-8 text-sm">
               No more recipes to load.
             </p>
           )}

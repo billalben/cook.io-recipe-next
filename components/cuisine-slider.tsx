@@ -80,7 +80,7 @@ export function CuisineSliders() {
       {CUISINES.map((cuisine) => (
         <div key={cuisine.label}>
           <div className="mx-auto max-w-7xl px-4 mb-4">
-            <h2 className="font-display text-xl md:text-2xl text-[var(--color-on-surface)]">
+            <h2 className="font-display text-xl md:text-2xl text-on-surface">
               Latest {cuisine.label} Recipes
             </h2>
           </div>
@@ -118,12 +118,12 @@ export function CuisineSliders() {
                 >
                   <Link
                     href={`/recipes?cuisineType=${cuisine.type}`}
-                    className="h-full flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-[var(--color-outline)] hover:border-primary transition-colors p-6 gap-2"
+                    className="h-full flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-outline hover:border-primary transition-colors p-6 gap-2"
                   >
-                    <span className="text-sm font-medium text-[var(--color-on-surface)]">
+                    <span className="text-sm font-medium text-on-surface">
                       Show More
                     </span>
-                    <ChevronRight className="w-5 h-5 text-[var(--color-on-surface-variant)]" />
+                    <ChevronRight className="w-5 h-5 text-on-surface-variant" />
                   </Link>
                 </div>
               </Carousel>

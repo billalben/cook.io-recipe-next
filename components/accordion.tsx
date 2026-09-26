@@ -33,13 +33,13 @@ export function Accordion({
   };
 
   return (
-    <div className="border-b border-[var(--color-outline)]">
+    <div className="border-b border-outline">
       <button
         type="button"
         onClick={handleToggle}
         aria-expanded={isExpanded}
         aria-controls={panelId}
-        className="w-full flex items-center justify-between py-3 text-sm font-medium text-[var(--color-on-surface)] hover:text-primary transition-colors"
+        className="w-full flex items-center justify-between py-3 text-sm font-medium text-on-surface hover:text-primary transition-colors"
       >
         {label}
         <ChevronDown

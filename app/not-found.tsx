@@ -7,10 +7,10 @@ export default function NotFound() {
       <div className="w-16 h-16 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center">
         <UtensilsCrossed className="w-7 h-7" />
       </div>
-      <h1 className="font-display text-2xl text-[var(--color-on-surface)]">
+      <h1 className="font-display text-2xl text-on-surface">
         Page not found
       </h1>
-      <p className="text-sm text-[var(--color-on-surface-variant)] max-w-sm">
+      <p className="text-sm text-on-surface-variant max-w-sm">
         The page you&apos;re looking for doesn&apos;t exist or may have been
         moved.
       </p>

@@ -68,8 +68,8 @@ function FilterPanelBody({
 }: FilterPanelBodyProps) {
   return (
     <div className="flex flex-col h-full min-h-0">
-      <div className="flex items-center justify-between p-4 border-b border-[var(--color-outline)]">
-        <h3 id={headingId} className="font-medium text-[var(--color-on-surface)]">
+      <div className="flex items-center justify-between p-4 border-b border-outline">
+        <h3 id={headingId} className="font-medium text-on-surface">
           Filters
         </h3>
         {onClose && (
@@ -77,24 +77,24 @@ function FilterPanelBody({
             type="button"
             onClick={onClose}
             aria-label="Close filters"
-            className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-[var(--color-outline-variant)]"
+            className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-outline-variant"
           >
-            <X className="w-5 h-5 text-[var(--color-on-surface)]" />
+            <X className="w-5 h-5 text-on-surface" />
           </button>
         )}
       </div>
 
       <div className="flex-1 overflow-y-auto p-4">
         <form onSubmit={onSearchSubmit} className="mb-4">
-          <div className="flex items-center rounded-lg border border-[var(--color-outline)] overflow-hidden">
-            <Search className="w-4 h-4 text-[var(--color-on-surface-variant)] ml-3" />
+          <div className="flex items-center rounded-lg border border-outline overflow-hidden">
+            <Search className="w-4 h-4 text-on-surface-variant ml-3" />
             <input
               type="search"
               value={searchValue}
               onChange={(e) => onSearchChange(e.target.value)}
               aria-label="Search recipes"
               placeholder="Search recipes..."
-              className="flex-1 py-2.5 px-3 text-sm bg-transparent outline-none text-[var(--color-on-surface)] placeholder:text-[var(--color-on-surface-variant)]"
+              className="flex-1 py-2.5 px-3 text-sm bg-transparent outline-none text-on-surface placeholder:text-on-surface-variant"
             />
           </div>
         </form>
@@ -114,7 +114,7 @@ function FilterPanelBody({
                 return (
                   <label
                     key={opt.value}
-                    className={`flex items-center gap-2.5 px-2 py-1.5 rounded cursor-pointer hover:bg-[var(--color-outline-variant)] transition-colors text-sm text-[var(--color-on-surface)] ${
+                    className={`flex items-center gap-2.5 px-2 py-1.5 rounded cursor-pointer hover:bg-outline-variant transition-colors text-sm text-on-surface ${
                       checked ? "text-primary" : ""
                     }`}
                   >
@@ -126,7 +126,7 @@ function FilterPanelBody({
                       onChange={() =>
                         onCheck(section.key, opt.value, section.type === "checkbox")
                       }
-                      className="accent-[var(--color-primary)]"
+                      className="accent-primary"
                     />
                     {opt.label}
                   </label>
@@ -137,11 +137,11 @@ function FilterPanelBody({
         ))}
       </div>
 
-      <div className="flex gap-3 p-4 border-t border-[var(--color-outline)]">
+      <div className="flex gap-3 p-4 border-t border-outline">
         <button
           type="button"
           onClick={onClear}
-          className="flex-1 py-2.5 rounded-full border border-[var(--color-outline)] text-sm font-medium text-[var(--color-on-surface)] hover:bg-[var(--color-outline-variant)] transition-colors"
+          className="flex-1 py-2.5 rounded-full border border-outline text-sm font-medium text-on-surface hover:bg-outline-variant transition-colors"
         >
           Clear
         </button>
@@ -263,7 +263,7 @@ export function FilterBarInner({
         )}
       </button>
 
-      <aside className="hidden md:flex md:sticky md:top-[var(--header-height)] md:h-[calc(100vh-var(--header-height))] md:w-[300px] lg:w-[340px] shrink-0 flex-col border-r border-[var(--color-outline)] bg-[var(--color-surface)]">
+      <aside className="hidden md:flex md:sticky md:top-[var(--header-height)] md:h-[calc(100vh-var(--header-height))] md:w-[300px] lg:w-[340px] shrink-0 flex-col border-r border-outline bg-surface">
         <FilterPanelBody {...panelProps} />
       </aside>
 
@@ -272,7 +272,7 @@ export function FilterBarInner({
         aria-labelledby={headingId}
         onClose={() => setIsOpen(false)}
         onClick={handleBackdropClick}
-        className="m-0 ml-auto h-full max-h-none w-[min(100%,400px)] max-w-none border-y-0 border-r-0 border-l border-[var(--color-outline)] bg-[var(--color-surface)] p-0 open:flex flex-col md:hidden"
+        className="m-0 ml-auto h-full max-h-none w-[min(100%,400px)] max-w-none border-y-0 border-r-0 border-l border-outline bg-surface p-0 open:flex flex-col md:hidden"
       >
         <FilterPanelBody {...panelProps} onClose={() => setIsOpen(false)} />
       </dialog>
